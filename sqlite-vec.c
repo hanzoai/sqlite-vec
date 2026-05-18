@@ -10473,8 +10473,21 @@ static int vec0Rename(sqlite3_vtab *pVtab, const char *zNew) {
   for (int i = 0; i < p->numVectorColumns; i++) {
     if (p->shadowIvfCellsNames[i]) {
       sqlite3_str_appendf(s,
+        "ALTER TABLE \"%w\".\"%w_ivf_centroids%02d\" RENAME TO \"%w_ivf_centroids%02d\";",
+        p->schemaName, p->tableName, i, zNew, i);
+      sqlite3_str_appendf(s,
         "ALTER TABLE \"%w\".\"%w_ivf_cells%02d\" RENAME TO \"%w_ivf_cells%02d\";",
         p->schemaName, p->tableName, i, zNew, i);
+      sqlite3_str_appendf(s,
+        "ALTER TABLE \"%w\".\"%w_ivf_rowid_map%02d\" RENAME TO \"%w_ivf_rowid_map%02d\";",
+        p->schemaName, p->tableName, i, zNew, i);
+      // _ivf_vectors is only created when quantizer != none
+      // (mirror ivf_create_shadow_tables in sqlite-vec-ivf.c).
+      if (p->vector_columns[i].ivf.quantizer != VEC0_IVF_QUANTIZER_NONE) {
+        sqlite3_str_appendf(s,
+          "ALTER TABLE \"%w\".\"%w_ivf_vectors%02d\" RENAME TO \"%w_ivf_vectors%02d\";",
+          p->schemaName, p->tableName, i, zNew, i);
+      }
     }
   }
 #endif
