@@ -3695,13 +3695,15 @@ void vec0_free_resources(vec0_vtab *p) {
     sqlite3_finalize(p->stmtIvfRowidMapLookup[i]); p->stmtIvfRowidMapLookup[i] = NULL;
     sqlite3_finalize(p->stmtIvfRowidMapDelete[i]); p->stmtIvfRowidMapDelete[i] = NULL;
     sqlite3_finalize(p->stmtIvfCentroidsAll[i]); p->stmtIvfCentroidsAll[i] = NULL;
+  }
+#endif
 #if SQLITE_VEC_ENABLE_DISKANN
+  for (int i = 0; i < VEC0_MAX_VECTOR_COLUMNS; i++) {
     sqlite3_finalize(p->stmtDiskannNodeRead[i]); p->stmtDiskannNodeRead[i] = NULL;
     sqlite3_finalize(p->stmtDiskannNodeWrite[i]); p->stmtDiskannNodeWrite[i] = NULL;
     sqlite3_finalize(p->stmtDiskannNodeInsert[i]); p->stmtDiskannNodeInsert[i] = NULL;
     sqlite3_finalize(p->stmtVectorsRead[i]); p->stmtVectorsRead[i] = NULL;
     sqlite3_finalize(p->stmtVectorsInsert[i]); p->stmtVectorsInsert[i] = NULL;
-#endif
   }
 #endif
 }
@@ -10370,28 +10372,7 @@ static int vec0Begin(sqlite3_vtab *pVTab) {
   return SQLITE_OK;
 }
 static int vec0Sync(sqlite3_vtab *pVTab) {
-  UNUSED_PARAMETER(pVTab);
-  vec0_vtab *p = (vec0_vtab *)pVTab;
-  if (p->stmtLatestChunk) {
-    sqlite3_finalize(p->stmtLatestChunk);
-    p->stmtLatestChunk = NULL;
-  }
-  if (p->stmtRowidsInsertRowid) {
-    sqlite3_finalize(p->stmtRowidsInsertRowid);
-    p->stmtRowidsInsertRowid = NULL;
-  }
-  if (p->stmtRowidsInsertId) {
-    sqlite3_finalize(p->stmtRowidsInsertId);
-    p->stmtRowidsInsertId = NULL;
-  }
-  if (p->stmtRowidsUpdatePosition) {
-    sqlite3_finalize(p->stmtRowidsUpdatePosition);
-    p->stmtRowidsUpdatePosition = NULL;
-  }
-  if (p->stmtRowidsGetChunkPosition) {
-    sqlite3_finalize(p->stmtRowidsGetChunkPosition);
-    p->stmtRowidsGetChunkPosition = NULL;
-  }
+  vec0_free_resources((vec0_vtab *)pVTab);
   return SQLITE_OK;
 }
 static int vec0Commit(sqlite3_vtab *pVTab) {
