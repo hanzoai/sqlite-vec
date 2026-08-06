@@ -1,0 +1,23 @@
+# The vec0 SQLite extension. C source, no image — it ships as a loadable
+# extension and a static lib built per platform at release.
+#
+# The gate is upstream's linux job, verbatim: vendor the sqlite amalgamation,
+# compile dist/vec0.so + dist/libsqlite_vec0.a, then run the pytest suite
+# AGAINST THE BUILT EXTENSION (478 tests, 204 snapshots, 132 platform skips) —
+# so this is a behavioural gate, not just a compile.
+#
+# uv is curl-installed when absent, the same shape this pipeline already uses to
+# put jq and yq on a bare runner; the suite is pinned by tests/uv.lock.
+#
+# `make test-unit` is deliberately NOT here: tests/test-unit.c does not compile
+# in this tree (unterminated #ifdef at line 2099, undeclared `col` at 1405) and
+# upstream's linux job does not build it either. A gate that cannot compile is
+# not a gate.
+test:
+  - name: test
+    run: |
+      set -e
+      ./scripts/vendor.sh
+      make loadable static
+      command -v uv >/dev/null 2>&1 || curl -LsSf https://astral.sh/uv/install.sh | sh
+      PATH="$HOME/.local/bin:$PATH" make test-loadable
