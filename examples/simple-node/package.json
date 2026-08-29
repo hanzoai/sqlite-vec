@@ -10,7 +10,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "better-sqlite3": "^9.6.0",
-    "sqlite-vec": "latest"
+    "better-sqlite3": "^13.0.3",
+    "sqlite-vec": "^0.1.9"
   }
 }

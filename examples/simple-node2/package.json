@@ -6,6 +6,6 @@
     "node": ">=23.5.0"
   },
   "dependencies": {
-    "sqlite-vec": "latest"
+    "sqlite-vec": "^0.1.9"
   }
 }
